@@ -1,45 +1,36 @@
-package testjava;
+package premalgo;
 
-import java.util.stream.IntStream;
-
-public class TestJava {
+public class PremAlgo {
+    int[][] grille;
+    int i=0;
     
-    int[][]board = {
-      { 7, 0, 0, 6, 0, 4, 0, 0, 2 },
-      { 0, 0, 2, 0, 0, 0, 0, 6, 0 },
-      { 0, 0, 0, 0, 0, 0, 3, 0, 0 },
-      { 0, 0, 0, 0, 4, 0, 0, 0, 0 },
-      { 0, 0, 0, 8, 0, 0, 0, 0, 6 },
-      { 0, 0, 0, 0, 0, 6, 0, 0, 0 },
-      { 0, 0, 7, 0, 0, 0, 0, 0, 0 },
-      { 6, 0, 0, 0, 0, 8, 0, 0, 0 },
-      { 0, 2, 0, 5, 0, 0, 0, 0, 9 }
-    };
-    
-    public static int BOARD__START__INDEX = 0;
-    public static int BOARD__SIZE = 9;
-    public static int NO__VALUE = 0;
-    public static int MIN__VALUE = 1;
-    public static int MAX__VALUE = 9;
-    public static int SUBSECTION__SIZE = 3;
-    
-    public TestJava () {
-        printBoard();
-        System.out.println();
-        boolean test = solve(board);
-        printBoard();
+    public PremAlgo (int[][] sudokuPartVide) {
+        grille=sudokuPartVide;
     }
-            
-    private boolean solve(int[][]board) {
-        for (int row = BOARD__START__INDEX; row < BOARD__SIZE; row++) {
-            for (int column = BOARD__START__INDEX; column < BOARD__SIZE; column++) {
-                if (board[row][column]== NO__VALUE) {
-                    for (int k = MIN__VALUE; k <= MAX__VALUE; k++) {
-                        board[row][column]= k;
-                        if (isValid(board, row, column) && solve(board)) {
-                            return true;
-                        }
-                        board[row][column]= NO__VALUE;
+    
+    public void afficherSudoku() {
+        for (int ligne = 0; ligne < 9; ligne++) {
+            System.out.print("{");
+            for (int colonne = 0; colonne < 9; colonne++) {
+                if (colonne==8) System.out.print(this.grille[ligne][colonne]);
+                else System.out.print(this.grille[ligne][colonne]+ ", ");
+            }
+            System.out.println("}");
+        }
+    }
+
+    public boolean Resolver () {
+        for (int ligne = 0; ligne < 9; ligne++) {
+            for (int colonne = 0; colonne < 9; colonne++) {
+                if (this.grille[ligne][colonne]==0) {
+                    for (int valeur = 1; valeur < 10; valeur++) {
+                        this.grille[ligne][colonne]=valeur;
+                        i++;
+                        System.out.println();
+                        System.out.println("Iteration n° : " + i);
+                        this.afficherSudoku();
+                        if (EstValide(ligne,colonne)) if (this.Resolver()) return true;
+                        this.grille[ligne][colonne]=0;
                     }
                     return false;
                 }
@@ -47,60 +38,45 @@ public class TestJava {
         }
         return true;
     }
-
-    private boolean isValid(int[][]board, int row, int column) {
-        return (rowConstraint(board, row)
-          && columnConstraint(board, column)
-          && subsectionConstraint(board, row, column));
-    }
-
-    private boolean rowConstraint(int[][]board, int row) {
-        boolean[]constraint = new boolean[BOARD__SIZE];
-        return IntStream.range(BOARD__START__INDEX, BOARD__SIZE).allMatch(column -> checkConstraint(board, row, constraint, column));
-    }
-
-    private boolean columnConstraint(int[][]board, int column) {
-        boolean[]constraint = new boolean[BOARD__SIZE];
-        return IntStream.range(BOARD__START__INDEX, BOARD__SIZE).allMatch(row -> checkConstraint(board, row, constraint, column));
-    }
-
-    private boolean subsectionConstraint(int[][]board, int row, int column) {
-        boolean[]constraint = new boolean[BOARD__SIZE];
-        int subsectionRowStart = (SUBSECTION__SIZE *(row/SUBSECTION__SIZE));
-        int subsectionRowEnd = subsectionRowStart + SUBSECTION__SIZE;
-
-        int subsectionColumnStart = (SUBSECTION__SIZE * (column/SUBSECTION__SIZE));
-        int subsectionColumnEnd = subsectionColumnStart + SUBSECTION__SIZE;
-
-        for (int r = subsectionRowStart; r < subsectionRowEnd; r++) {
-            for (int c = subsectionColumnStart; c < subsectionColumnEnd; c++) {
-                if (!checkConstraint(board, r, constraint, c)) return false;
+            
+    public boolean EstValide (int ligne, int colonne) {
+        int valeur = this.grille[ligne][colonne];
+        for (int index=0; index<9; index++) {
+            if (this.grille[ligne][index]==valeur) if (index!=colonne) return false;
+            if (this.grille[index][colonne]==valeur) if (index!=ligne) return false;
+        }
+        int CLigne = ligne/3;
+        int CColonne = colonne/3;
+        for (int index=0+CLigne*3; index<3+CLigne*3; index++) {
+            for (int jndex=0+CColonne*3; jndex<3+CColonne*3; jndex++) {
+                if (this.grille[index][jndex]==valeur) if (index!=ligne && jndex!=colonne) return false;
             }
         }
         return true;
     }
 
-    boolean checkConstraint(int[][]board, int row, boolean[]constraint, int column) {
-        
-        if (board[row][column]!= NO__VALUE) {
-            if (!constraint[board[row][column]- 1]) {
-                constraint[board[row][column]- 1]= true;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void printBoard() {
-        for (int row = BOARD__START__INDEX; row < BOARD__SIZE; row++) {
-            for (int column = BOARD__START__INDEX; column < BOARD__SIZE; column++) {
-                System.out.print(board[row][column]+ " ");
-            }
-            System.out.println();
-        }
-    }
     public static void main(String[] args) {
-         TestJava test = new TestJava();
+        int[][] sudokuPartVide = {
+        { 0, 0, 0, 3, 2, 1, 0, 0, 9 },
+        { 0, 8, 0, 6, 7, 4, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 4, 7 },
+        { 4, 0, 6, 0, 0, 7, 0, 0, 2 },
+        { 5, 0, 0, 2, 0, 0, 4, 0, 6 },
+        { 0, 0, 8, 0, 0, 6, 0, 0, 5 },
+        { 0, 4, 0, 0, 0, 2, 1, 0, 8 },
+        { 1, 7, 0, 5, 6, 0, 0, 0, 0 },
+        { 8, 6, 0, 4, 1, 9, 5, 0, 3 }};
+        PremAlgo sudoku = new PremAlgo (sudokuPartVide);
+        long tdebut = new java.util.Date().getTime();
+        sudoku.afficherSudoku();
+        if (sudoku.Resolver()) {
+            System.out.println();
+            System.out.println("L'une des solutions est : ");
+            sudoku.afficherSudoku();
+            System.out.println();
+            System.out.println("L'algo a pris " + (new java.util.Date().getTime() - tdebut) + " milisecondes à resoudre le sudoku");
+        } else {
+            System.out.println ("Il n'y a pas de solution");
+        }
     }
 }
